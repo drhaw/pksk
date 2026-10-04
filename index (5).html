@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Latihan PKSK Pintar (Bahagian C)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Custom Scrollbar for Textarea */
+        textarea::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
+        textarea::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+        textarea::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800 p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- Header Pintar -->
+        <div class="bg-white rounded-2xl shadow-sm border-l-4 border-l-indigo-600 p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl font-bold text-slate-900">PKSK<span class="text-indigo-600">Smart</span></h1>
+                    <span class="bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">Beta AI</span>
+                </div>
+                <p class="text-slate-500 text-sm mt-1">Sistem Semakan & Panduan Artikulasi Penulisan (Bahagian C)</p>
+            </div>
+            
+            <div class="flex items-center gap-4 bg-slate-100 px-4 py-2 rounded-xl border border-slate-200">
+                <div id="timer-display" class="text-3xl font-mono font-bold text-slate-800">
+                    30:00
+                </div>
+                <button id="btn-toggle-timer" class="hidden p-2 bg-white hover:bg-slate-200 text-slate-700 rounded-lg shadow-sm transition-colors" title="Jeda/Sambung Masa">
+                    <svg id="icon-pause" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                    <svg id="icon-play" class="hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- Kolum Kiri (Soalan & Pembantu) -->
+            <div class="lg:col-span-1 flex flex-col gap-4">
+                
+                <!-- Kad Soalan -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+                    <span id="question-category" class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-lg border border-indigo-100 uppercase tracking-wider block w-max">
+                        Kategori
+                    </span>
+                    <h2 id="question-text" class="text-base font-medium leading-relaxed text-slate-900">
+                        "Soalan akan dipaparkan di sini."
+                    </h2>
+                    
+                    <button id="btn-randomize" class="w-full py-2 flex justify-center items-center gap-2 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors text-sm font-medium">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg>
+                        Tukar Soalan
+                    </button>
+                </div>
+
+                <!-- Pembantu Pintar -->
+                <div id="smart-assistant" class="bg-gradient-to-b from-indigo-900 to-slate-900 rounded-2xl p-5 shadow-md border border-indigo-950 text-indigo-50 flex-1 transition-all">
+                    <div class="flex justify-between items-center mb-4 border-b border-white/20 pb-2">
+                        <h3 class="font-bold text-sm flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                            Pembantu Pintar
+                        </h3>
+                        <button id="btn-toggle-assistant" class="hidden text-white/50 hover:text-white text-xs">
+                            Tutup
+                        </button>
+                    </div>
+                    
+                    <div id="assistant-content" class="space-y-4">
+                        <div class="text-xs text-indigo-200">Gunakan rangka isi di bawah sebagai panduan karangan anda:</div>
+                        <ul id="assistant-hints" class="text-sm space-y-3">
+                            <!-- Hints akan dijana melalui JS -->
+                        </ul>
+                    </div>
+                    <div id="assistant-hidden-msg" class="hidden text-center text-sm text-white/50 py-10 italic">
+                        Panduan disembunyikan. Fokus pada penulisan anda.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kolum Kanan (Ruang Menulis & Keputusan) -->
+            <div class="lg:col-span-3 flex flex-col h-full space-y-4">
+                
+                <!-- View: Permulaan -->
+                <div id="view-start" class="bg-white rounded-2xl p-10 shadow-sm border border-slate-200 flex flex-col items-center justify-center h-full text-center">
+                    <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    </div>
+                    <h2 class="text-3xl font-bold text-slate-800 mb-4">Sedia Untuk Bermula?</h2>
+                    <p class="text-slate-500 max-w-md mb-8">
+                        Anda mempunyai masa <strong class="text-slate-700">30 minit</strong>. Sistem AI kami akan memantau struktur, kata kunci, dan tatabahasa anda secara pintar.
+                    </p>
+                    <button id="btn-start" class="bg-indigo-600 text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-1 transition-all">
+                        Mula Tulis Karangan
+                    </button>
+                </div>
+
+                <!-- View: Editor Penulisan -->
+                <div id="view-editor" class="hidden flex-1 flex-col bg-white rounded-2xl shadow-sm border border-slate-200 relative min-h-[500px]">
+                    
+                    <!-- Editor Header (Live Trackers) -->
+                    <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex flex-wrap gap-6 items-center text-sm rounded-t-2xl">
+                        <div class="flex flex-col">
+                            <span class="text-slate-500 text-xs uppercase font-bold tracking-wider mb-1">Perkataan</span>
+                            <span class="font-mono text-lg font-bold text-amber-500" id="word-count-display">
+                                0 <span class="text-xs text-slate-400 font-sans font-normal">/ 100+</span>
+                            </span>
+                        </div>
+                        <div class="w-px h-8 bg-slate-200 hidden md:block"></div>
+                        <div class="flex flex-col">
+                            <span class="text-slate-500 text-xs uppercase font-bold tracking-wider mb-1">Perenggan</span>
+                            <span class="font-mono text-lg font-bold text-amber-500" id="para-count-display">
+                                0 <span class="text-xs text-slate-400 font-sans font-normal">/ 3-4</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Textarea -->
+                    <textarea id="essay-textarea" class="flex-1 w-full p-6 lg:p-8 resize-none outline-none focus:ring-0 text-slate-700 leading-loose text-lg" style="min-height: 400px;" placeholder="Format cadangan: 1 Pendahuluan, 2 Isi Penting, 1 Penutup. Mulakan karangan anda di sini..."></textarea>
+
+                    <!-- View: Analisis & Keputusan (Overlay) -->
+                    <div id="view-analysis" class="hidden absolute inset-0 bg-white/98 backdrop-blur-md z-10 flex flex-col p-6 lg:p-10 overflow-y-auto rounded-2xl fade-in">
+                        <div class="flex flex-col items-center mb-8 border-b pb-8">
+                            <div class="text-6xl font-black text-indigo-600 mb-2">
+                                <span id="score-display">0</span><span class="text-2xl text-slate-400">%</span>
+                            </div>
+                            <div class="text-sm uppercase tracking-widest font-bold text-slate-400">Skor Pintar AI</div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                                <div class="text-xs font-bold text-slate-500 uppercase mb-3">Analisis Struktur</div>
+                                <div class="flex justify-between items-end mb-2">
+                                    <span class="text-sm text-slate-600">Patah Perkataan:</span>
+                                    <span class="font-bold" id="stat-words">0</span>
+                                </div>
+                                <div class="flex justify-between items-end">
+                                    <span class="text-sm text-slate-600">Jumlah Perenggan:</span>
+                                    <span class="font-bold" id="stat-paras">0</span>
+                                </div>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                                <div class="text-xs font-bold text-slate-500 uppercase mb-3">Analisis Kosa Kata</div>
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-sm text-slate-600">Penanda Wacana Dijumpai:</span>
+                                    <span class="font-bold text-right text-indigo-600" id="stat-pw">Tiada</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-6 mb-8">
+                            <h3 class="font-bold text-indigo-900 mb-4 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                                Ulasan Sistem Pintar:
+                            </h3>
+                            <ul id="feedback-list" class="space-y-3">
+                                <!-- Feedback injected here -->
+                            </ul>
+                        </div>
+
+                        <div class="flex justify-center mt-auto">
+                            <button id="btn-reset" class="px-8 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors shadow-sm">
+                                Mula Latihan Baharu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Bar -->
+                <div id="action-bar" class="hidden gap-4">
+                    <button id="btn-submit" disabled class="flex-1 py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-2xl shadow-sm transition-all text-lg flex justify-center items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        Hantar untuk Semakan AI
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Constants & Data
+        const PENANDA_WACANA = [
+            "selain itu", "di samping itu", "seterusnya", "kesimpulannya", "namun begitu", 
+            "walau bagaimanapun", "oleh itu", "sebagai contoh", "tamsilnya", "akhir kata",
+            "pada pendapat saya", "sebagai kesimpulan", "lebih-lebih lagi"
+        ];
+
+        const TOPICS = [
+            {
+                category: "Matlamat & Halatuju",
+                question: "Mengapakah anda berminat untuk menyambung pelajaran di sekolah khusus (SBP/SMKA/KV/SMT)?",
+                hints: [
+                    "Pendahuluan: Nyatakan cita-cita dan bagaimana sekolah khusus membantu mencapainya.",
+                    "Isi 1: Kemudahan/Fasiliti yang lengkap (Makmal, Bengkel) untuk pembelajaran.",
+                    "Isi 2: Persekitaran pembelajaran positif & persaingan sihat antara rakan.",
+                    "Penutup: Harapan untuk berjaya dan membalas jasa keluarga dan negara."
+                ],
+                keywords: ["cita-cita", "kemudahan", "fasiliti", "makmal", "persekitaran", "rakan", "bersaing", "harapan", "berbakti", "fokus", "batu loncatan", "berdikari"],
+                example: `Saya amat berminat untuk menyambung pelajaran di sekolah khusus kerana saya bercita-cita menjadi seorang jurutera yang berjaya. Sekolah khusus merupakan batu loncatan terbaik untuk saya mencapai impian tersebut.
+
+Antara sebab utama ialah sekolah khusus menyediakan kemudahan dan fasiliti yang sangat lengkap. Sebagai contoh, makmal sains dan bengkel kemahiran yang canggih membolehkan saya melakukan amali dengan lebih berkesan. Ini pasti membantu saya lebih fokus dalam pelajaran.
+
+Selain itu, persekitaran pembelajaran di sekolah khusus sangat positif. Saya dapat belajar bersama rakan-rakan yang pintar dan bermotivasi tinggi. Suasana asrama juga mendidik saya menjadi lebih berdikari, berdisiplin, dan mewujudkan persaingan sihat dalam pelajaran.
+
+Kesimpulannya, saya amat berharap agar terpilih memasuki sekolah khusus. Saya berjanji akan belajar bersungguh-sungguh demi mencapai cita-cita dan membalas jasa ibu bapa serta berbakti kepada negara.`
+            },
+            {
+                category: "Kepimpinan & Sahsiah",
+                question: "Sebagai seorang ketua pengawas, bincangkan langkah-langkah untuk memastikan murid mematuhi peraturan sekolah.",
+                hints: [
+                    "Pendahuluan: Peranan pengawas sebagai pemimpin kecil dan pentingnya disiplin.",
+                    "Isi 1: Menjadi 'Role Model' (Suri Teladan) dari segi pakaian dan tingkah laku.",
+                    "Isi 2: Memberi teguran secara berhemah tetapi tegas kepada yang melanggar disiplin.",
+                    "Penutup: Kerjasama semua pihak penting untuk sekolah yang aman."
+                ],
+                keywords: ["disiplin", "role model", "suri teladan", "peraturan", "menegur", "berhemah", "tegas", "kerjasama", "guru", "tanggungjawab", "pemimpin"],
+                example: `Pengawas merupakan pemimpin kecil di sekolah dan tangan kanan guru. Disiplin amat penting bagi melahirkan pelajar yang berjaya dan cemerlang. Sebagai ketua pengawas, saya akan mengambil beberapa langkah untuk memastikan murid mematuhi peraturan sekolah.
+
+Langkah pertama ialah saya perlu menjadi "suri teladan" yang baik kepada pelajar lain. Sebelum menegur kesalahan orang lain, saya perlu mematuhi peraturan terlebih dahulu. Contohnya, saya akan sentiasa hadir awal ke sekolah, memakai pakaian seragam yang kemas, dan bercakap dengan sopan.
+
+Selain itu, saya akan memberi teguran secara berhemah tetapi tegas. Jika ada rakan yang melakukan kesalahan seperti bising atau ponteng kelas, saya akan menasihati mereka dengan baik. Jika mereka masih berdegil, saya akan mencatat nama mereka dan melaporkan kepada Guru Disiplin untuk tindakan lanjut.
+
+Kesimpulannya, kerjasama semua pihak amat penting dalam menjaga disiplin. Jika semua pelajar patuh pada arahan dan peraturan, sekolah akan menjadi tempat yang aman dan sangat kondusif untuk proses pembelajaran.`
+            },
+            {
+                category: "Isu Semasa",
+                question: "Bincangkan kebaikan dan keburukan penggunaan telefon pintar kepada pelajar.",
+                hints: [
+                    "Pendahuluan: Telefon pintar sebagai keperluan hidup masa kini.",
+                    "Isi 1 (Kebaikan): Memudahkan proses PdP, carian maklumat, dan komunikasi.",
+                    "Isi 2 (Keburukan): Menyebabkan ketagihan (game/media sosial) dan melalaikan.",
+                    "Penutup: Bergantung kepada cara penggunaan, perlu bijak bahagi masa."
+                ],
+                keywords: ["maklumat", "pembelajaran", "komunikasi", "ketagihan", "melalaikan", "media sosial", "kebaikan", "keburukan", "masa", "manfaat"],
+                example: `Pada zaman serba moden ini, telefon pintar kini telah menjadi satu keperluan hidup, terutamanya untuk generasi muda. Alat canggih ini membawa banyak kebaikan kepada pelajar, namun terdapat juga kesan buruk jika ia tidak dikawal penggunaannya.
+
+Antara kebaikan telefon pintar ialah ia dapat memudahkan proses pembelajaran. Pelajar boleh mencari pelbagai maklumat dan bahan rujukan dengan pantas hanya di hujung jari. Contohnya, menggunakan aplikasi pendidikan, mencari fakta di internet, dan berbincang kerja sekolah melalui kumpulan perbualan bersama guru dan rakan.
+
+Walau bagaimanapun, telefon pintar juga boleh menyebabkan ketagihan dan melalaikan. Jika tidak dikawal, pelajar leka menghabiskan masa berjam-jam menatap skrin sehingga mengabaikan pelajaran. Terlalu asyik bermain permainan video atau melayari media sosial sehingga lewat malam akan menjejaskan kesihatan dan juga fokus di dalam kelas.
+
+Kesimpulannya, telefon pintar ibarat pisau; kesannya bergantung kepada cara kita menggunakannya. Pelajar perlulah bijak membahagikan masa agar teknologi ini memberi manfaat yang berguna, dan bukannya merosakkan masa depan.`
+            },
+            {
+                category: "Sahsiah Diri",
+                question: "Huraikan ciri-ciri seorang rakan yang positif dan mengapa kita perlu memilih rakan yang baik.",
+                hints: [
+                    "Pendahuluan: Rakan sebaya mencorakkan peribadi kita.",
+                    "Isi 1: Sentiasa mengajak ke arah kebaikan (contoh: solat, ulang kaji).",
+                    "Isi 2: Bersikap jujur, sedia membantu, dan menegur kesilapan kita.",
+                    "Penutup: Kita mesti bijak memilih kawan dan berusaha jadi kawan yang baik."
+                ],
+                keywords: ["pengaruh", "kebaikan", "membantu", "jujur", "menegur", "kesilapan", "sokongan", "belajar", "akhlak", "positif"],
+                example: `Rakan sebaya memainkan peranan yang sangat besar dalam membentuk corak peribadi kita. Memilih rakan yang positif adalah salah satu kunci utama kepada kejayaan diri seseorang pelajar. 
+
+Ciri utama seorang rakan yang positif ialah mereka sentiasa mengajak kita ke arah kebaikan. Rakan yang baik akan sentiasa mengingatkan kita tentang tanggungjawab sebagai pelajar yang cemerlang. Sebagai contoh, mereka akan mengajak kita untuk mengulang kaji pelajaran bersama-sama dan sentiasa menasihati kita agar mematuhi peraturan sekolah.
+
+Selain itu, rakan yang baik juga bersikap jujur dan sedia membantu. Mereka akan sentiasa ada bersama kita pada waktu susah mahupun senang. Tamsilnya, rakan yang positif berani menegur kesilapan kita dengan niat untuk membaiki diri, serta sudi meminjamkan nota apabila kita tidak hadir ke sekolah atas urusan tertentu.
+
+Kesimpulannya, kita mestilah bijak dan berhati-hati dalam memilih kawan. Semoga kita juga dapat menjadi rakan yang positif dan memberikan pengaruh yang baik kepada orang lain agar disayangi oleh masyarakat.`
+            }
+        ];
+
+        const TIMER_MINUTES = 30;
+
+        // State Variables
+        let currentTopicIndex = 0;
+        let timeLeft = TIMER_MINUTES * 60;
+        let timerInterval = null;
+        let isTimerRunning = false;
+        let isExamStarted = false;
+        let isSubmitted = false;
+        let showSmartAssistant = true;
+
+        // DOM Elements
+        const timerDisplay = document.getElementById('timer-display');
+        const btnToggleTimer = document.getElementById('btn-toggle-timer');
+        const iconPlay = document.getElementById('icon-play');
+        const iconPause = document.getElementById('icon-pause');
+        
+        const questionCategory = document.getElementById('question-category');
+        const questionText = document.getElementById('question-text');
+        const btnRandomize = document.getElementById('btn-randomize');
+        
+        const btnShowExample = document.createElement('button');
+        const btnShowTips = document.createElement('button');
+        const modalOverlay = document.createElement('div');
+        const modalContent = document.createElement('div');
+        
+        const assistantContent = document.getElementById('assistant-content');
+        const assistantHints = document.getElementById('assistant-hints');
+        const assistantHiddenMsg = document.getElementById('assistant-hidden-msg');
+        const btnToggleAssistant = document.getElementById('btn-toggle-assistant');
+        const smartAssistantBox = document.getElementById('smart-assistant');
+        
+        const viewStart = document.getElementById('view-start');
+        const btnStart = document.getElementById('btn-start');
+        const viewEditor = document.getElementById('view-editor');
+        const essayTextarea = document.getElementById('essay-textarea');
+        const wordCountDisplay = document.getElementById('word-count-display');
+        const paraCountDisplay = document.getElementById('para-count-display');
+        
+        const actionBar = document.getElementById('action-bar');
+        const btnSubmit = document.getElementById('btn-submit');
+        const viewAnalysis = document.getElementById('view-analysis');
+        const btnReset = document.getElementById('btn-reset');
+        
+        const statWords = document.getElementById('stat-words');
+        const statParas = document.getElementById('stat-paras');
+        const statPw = document.getElementById('stat-pw');
+        const scoreDisplay = document.getElementById('score-display');
+        const feedbackList = document.getElementById('feedback-list');
+
+        // Initialize App
+        function init() {
+            setupModal();
+            loadTopic(currentTopicIndex);
+            updateTimerDisplay();
+        }
+
+        function setupModal() {
+            // Setup Modal Container
+            modalOverlay.className = "fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300";
+            modalContent.className = "bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col transform scale-95 transition-transform duration-300";
+            
+            // Setup Buttons for the Left Column
+            btnShowExample.className = "w-full mt-3 py-2 flex justify-center items-center gap-2 bg-indigo-50 text-indigo-700 rounded-xl hover:bg-indigo-100 transition-colors text-sm font-medium border border-indigo-200";
+            btnShowExample.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Lihat Contoh Karangan`;
+            
+            btnShowTips.className = "w-full mt-3 py-2 flex justify-center items-center gap-2 bg-amber-50 text-amber-700 rounded-xl hover:bg-amber-100 transition-colors text-sm font-medium border border-amber-200";
+            btnShowTips.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg> Tips PKSK (Tahun 6)`;
+
+            // Append buttons under the question
+            document.querySelector('#question-text').parentNode.appendChild(btnShowExample);
+            document.querySelector('#question-text').parentNode.appendChild(btnShowTips);
+            document.body.appendChild(modalOverlay);
+
+            // Modal Events
+            modalOverlay.addEventListener('click', (e) => {
+                if(e.target === modalOverlay) closeModal();
+            });
+
+            btnShowExample.addEventListener('click', () => {
+                const topic = TOPICS[currentTopicIndex];
+                const words = topic.example.trim().split(/\s+/).length;
+                const paras = topic.example.trim().split(/\n+/).length;
+                
+                showModal(
+                    `Contoh Karangan: ${topic.category}`,
+                    `<div class="prose prose-slate max-w-none">
+                        <div class="flex gap-4 mb-4 text-xs font-bold text-slate-500 uppercase">
+                            <span class="bg-slate-100 px-3 py-1 rounded-full">${words} Patah Perkataan</span>
+                            <span class="bg-slate-100 px-3 py-1 rounded-full">${paras} Perenggan</span>
+                        </div>
+                        <p class="whitespace-pre-line text-slate-700 leading-relaxed text-base">${topic.example}</p>
+                    </div>`
+                );
+            });
+
+            btnShowTips.addEventListener('click', () => {
+                showModal(
+                    `Tips & Panduan PKSK (Calon Tahun 6)`,
+                    `<div class="space-y-6 text-slate-700 text-sm">
+                        <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
+                            <h4 class="font-bold text-amber-800 mb-2">1. Formula 4-5 Perenggan Emas</h4>
+                            <p>Untuk pelajar Tahun 6 (berumur 12 tahun), sasaran karangan adalah <strong>minimum 100 patah perkataan</strong>. Jangan tulis terlalu panjang hingga kehabisan masa. Cukup sekadar 4 atau 5 perenggan yang padat:</p>
+                            <ul class="list-disc ml-5 mt-2 space-y-1 text-amber-900">
+                                <li><strong>1 Pendahuluan</strong> (2-3 ayat ringkas)</li>
+                                <li><strong>2 atau 3 Isi Penting</strong> (Ada Isi + Huraian + Contoh)</li>
+                                <li><strong>1 Penutup</strong> (Kesimpulan & Harapan)</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-slate-900 mb-2 border-b pb-1">2. Wajib Guna Penanda Wacana</h4>
+                            <p>Bagi memastikan ayat nampak matang dan lancar, mulakan perenggan isi dan penutup dengan penanda wacana yang sesuai. Contohnya:</p>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                <span class="bg-slate-100 border border-slate-200 px-2 py-1 rounded text-xs">Selain itu,</span>
+                                <span class="bg-slate-100 border border-slate-200 px-2 py-1 rounded text-xs">Di samping itu,</span>
+                                <span class="bg-slate-100 border border-slate-200 px-2 py-1 rounded text-xs">Seterusnya,</span>
+                                <span class="bg-slate-100 border border-slate-200 px-2 py-1 rounded text-xs">Sebagai contoh,</span>
+                                <span class="bg-slate-100 border border-slate-200 px-2 py-1 rounded text-xs">Kesimpulannya,</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-slate-900 mb-2 border-b pb-1">3. Pengurusan Masa (45 Minit)</h4>
+                            <ul class="list-decimal ml-5 space-y-1">
+                                <li><strong>5 Minit:</strong> Baca soalan, pilih tajuk yang paling difahami, dan buat draf isi ringkas (Rangka).</li>
+                                <li><strong>30 Minit:</strong> Fokus menaip/menulis karangan. Jangan berhenti terlalu lama berfikir untuk satu ayat.</li>
+                                <li><strong>10 Minit:</strong> Baca semula dan semak ejaan, imbuhan, dan tanda baca. Kesalahan ejaan boleh mengurangkan markah.</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-slate-900 mb-2 border-b pb-1">4. Elakkan Kesalahan Umum</h4>
+                            <ul class="list-disc ml-5 space-y-1 text-red-600">
+                                <li>Jangan guna "bahasa rojak" atau slanga internet (cth: <em>yg, dgn, nak, mcm</em>). Guna bahasa Melayu baku.</li>
+                                <li>Jangan tulis satu perenggan sahaja yang panjang meleret. Mesti ada perenggan.</li>
+                                <li>Jangan terkeluar tajuk. Pastikan setiap perenggan isi menjawab kehendak soalan.</li>
+                            </ul>
+                        </div>
+                    </div>`
+                );
+            });
+        }
+
+        function showModal(title, contentHTML) {
+            modalContent.innerHTML = `
+                <div class="flex justify-between items-center p-5 border-b border-slate-200 bg-slate-50">
+                    <h3 class="font-bold text-lg text-slate-800">${title}</h3>
+                    <button id="btn-close-modal" class="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-md hover:bg-slate-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <div class="p-6 overflow-y-auto">
+                    ${contentHTML}
+                </div>
+            `;
+            
+            modalOverlay.appendChild(modalContent);
+            modalOverlay.classList.remove('hidden');
+            
+            // Trigger reflow for animation
+            void modalOverlay.offsetWidth;
+            
+            modalOverlay.classList.remove('opacity-0');
+            modalContent.classList.remove('scale-95');
+            
+            document.getElementById('btn-close-modal').addEventListener('click', closeModal);
+        }
+
+        function closeModal() {
+            modalOverlay.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modalOverlay.classList.add('hidden');
+            }, 300);
+        }
+
+        function loadTopic(index) {
+            const topic = TOPICS[index];
+            questionCategory.textContent = topic.category;
+            questionText.textContent = `"${topic.question}"`;
+            
+            assistantHints.innerHTML = '';
+            topic.hints.forEach(hint => {
+                const parts = hint.split(': ');
+                const title = parts[0];
+                const desc = parts[1] || '';
+                const li = document.createElement('li');
+                li.className = "bg-white/10 p-2 rounded-lg";
+                li.innerHTML = `<strong class="block text-indigo-300 text-xs mb-1">${title}</strong><span class="text-slate-200 leading-snug">${desc}</span>`;
+                assistantHints.appendChild(li);
+            });
+        }
+
+        // Timer Functions
+        function updateTimerDisplay() {
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const s = (timeLeft % 60).toString().padStart(2, '0');
+            timerDisplay.textContent = `${m}:${s}`;
+            
+            if (timeLeft < 300) { // less than 5 mins
+                timerDisplay.classList.add('text-red-600', 'animate-pulse');
+                timerDisplay.classList.remove('text-slate-800');
+            } else {
+                timerDisplay.classList.remove('text-red-600', 'animate-pulse');
+                timerDisplay.classList.add('text-slate-800');
+            }
+        }
+
+        function startTimer() {
+            isTimerRunning = true;
+            iconPause.classList.remove('hidden');
+            iconPlay.classList.add('hidden');
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleSmartSubmit(); // Auto submit
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            isTimerRunning = false;
+            clearInterval(timerInterval);
+            iconPause.classList.add('hidden');
+            iconPlay.classList.remove('hidden');
+        }
+
+        // Live Trackers
+        function getWordCount(text) {
+            return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+        }
+
+        function getParagraphCount(text) {
+            return text.trim().split(/\n+/).filter(para => para.length > 0).length;
+        }
+
+        essayTextarea.addEventListener('input', () => {
+            const text = essayTextarea.value;
+            const words = getWordCount(text);
+            const paras = getParagraphCount(text);
+            
+            // Enable/disable submit button
+            btnSubmit.disabled = text.trim().length === 0;
+
+            // Update Word Count UI
+            let wordColor = words < 100 ? 'text-amber-500' : 'text-green-600';
+            wordCountDisplay.innerHTML = `${words} <span class="text-xs text-slate-400 font-sans font-normal">/ 100+</span>`;
+            wordCountDisplay.className = `font-mono text-lg font-bold ${wordColor}`;
+
+            // Update Para Count UI
+            let paraColor = paras < 3 ? 'text-amber-500' : 'text-green-600';
+            paraCountDisplay.innerHTML = `${paras} <span class="text-xs text-slate-400 font-sans font-normal">/ 3-4</span>`;
+            paraCountDisplay.className = `font-mono text-lg font-bold ${paraColor}`;
+        });
+
+        // Event Listeners
+        btnRandomize.addEventListener('click', () => {
+            if (isExamStarted) return;
+            let newIndex = currentTopicIndex;
+            while (newIndex === currentTopicIndex) {
+                newIndex = Math.floor(Math.random() * TOPICS.length);
+            }
+            currentTopicIndex = newIndex;
+            loadTopic(currentTopicIndex);
+        });
+
+        btnStart.addEventListener('click', () => {
+            isExamStarted = true;
+            viewStart.classList.add('hidden');
+            viewEditor.classList.remove('hidden');
+            viewEditor.classList.add('flex');
+            actionBar.classList.remove('hidden');
+            actionBar.classList.add('flex');
+            
+            btnRandomize.classList.add('hidden');
+            btnToggleTimer.classList.remove('hidden');
+            btnToggleAssistant.classList.remove('hidden');
+            
+            startTimer();
+            setTimeout(() => essayTextarea.focus(), 100);
+        });
+
+        btnToggleTimer.addEventListener('click', () => {
+            if (isTimerRunning) pauseTimer();
+            else startTimer();
+            essayTextarea.disabled = !isTimerRunning;
+            if(!isTimerRunning){
+                essayTextarea.classList.add('bg-slate-50/50');
+            } else {
+                essayTextarea.classList.remove('bg-slate-50/50');
+                essayTextarea.focus();
+            }
+        });
+
+        btnToggleAssistant.addEventListener('click', () => {
+            showSmartAssistant = !showSmartAssistant;
+            btnToggleAssistant.textContent = showSmartAssistant ? "Tutup" : "Buka";
+            if (showSmartAssistant) {
+                assistantContent.classList.remove('hidden');
+                assistantHiddenMsg.classList.add('hidden');
+                smartAssistantBox.classList.remove('opacity-50');
+            } else {
+                assistantContent.classList.add('hidden');
+                assistantHiddenMsg.classList.remove('hidden');
+                smartAssistantBox.classList.add('opacity-50');
+            }
+        });
+
+        function handleSmartSubmit() {
+            pauseTimer();
+            isSubmitted = true;
+            btnToggleTimer.classList.add('hidden');
+            essayTextarea.disabled = true;
+            actionBar.classList.add('hidden');
+            actionBar.classList.remove('flex');
+            
+            const text = essayTextarea.value;
+            const textLower = text.toLowerCase();
+            const words = getWordCount(text);
+            const paragraphs = getParagraphCount(text);
+            
+            // 1. Detect Penanda Wacana
+            let pwFound = [];
+            PENANDA_WACANA.forEach(pw => {
+                if (textLower.includes(pw)) pwFound.push(pw);
+            });
+
+            // 2. Detect Topic Keywords
+            let keywordsFound = [];
+            const topic = TOPICS[currentTopicIndex];
+            topic.keywords.forEach(kw => {
+                if (textLower.includes(kw)) keywordsFound.push(kw);
+            });
+
+            // 3. Generate Smart Feedback & Score
+            let feedback = [];
+            let score = 0; // Max 100
+
+            // Paragraph score (max 25)
+            if (paragraphs === 4) { feedback.push("✅ Struktur sangat baik (4 Perenggan)."); score += 25; }
+            else if (paragraphs >= 3) { feedback.push("✅ Struktur baik (Cukup perenggan utama)."); score += 20; }
+            else { feedback.push("❌ Kurang perenggan. Perlu sekurang-kurangnya 3-4 perenggan."); score += 10; }
+
+            // Length score (max 25)
+            if (words >= 100 && words <= 180) { feedback.push("✅ Panjang karangan ideal (100-180 patah perkataan)."); score += 25; }
+            else if (words > 180) { feedback.push("⚠️ Karangan agak panjang, hati-hati dengan masa."); score += 20; }
+            else { feedback.push("❌ Karangan terlalu pendek. Huraikan lagi idea anda."); score += 10; }
+
+            // Penanda Wacana score (max 25)
+            if (pwFound.length >= 3) { feedback.push(`✅ Kosa kata mantap. Anda guna ${pwFound.length} penanda wacana.`); score += 25; }
+            else if (pwFound.length > 0) { feedback.push(`⚠️ Penggunaan penanda wacana agak kurang (${pwFound.length}). Tambahkan lagi untuk kelancaran.`); score += 15; }
+            else { feedback.push("❌ Tiada penanda wacana dikesan. Ayat mungkin kurang lancar."); score += 5; }
+
+            // Keyword/Relevance score (max 25)
+            const keywordPercentage = keywordsFound.length / topic.keywords.length;
+            if (keywordPercentage > 0.4) { feedback.push("✅ Isi sangat menepati tema tajuk."); score += 25; }
+            else if (keywordPercentage > 0.1) { feedback.push("⚠️ Isi relevan tetapi boleh dihuraikan dengan lebih mendalam."); score += 15; }
+            else { feedback.push("❌ Karangan mungkin terkeluar tajuk. Tiada kata kunci utama dikesan."); score += 5; }
+
+            // Update UI with Results
+            statWords.textContent = words;
+            statParas.textContent = paragraphs;
+            statPw.textContent = pwFound.length > 0 ? pwFound.join(", ") : "Tiada";
+            scoreDisplay.textContent = score;
+            
+            feedbackList.innerHTML = '';
+            feedback.forEach(fb => {
+                const li = document.createElement('li');
+                li.className = "flex gap-3 text-slate-700 text-sm md:text-base leading-relaxed";
+                li.textContent = fb;
+                feedbackList.appendChild(li);
+            });
+
+            viewAnalysis.classList.remove('hidden');
+        }
+
+        btnSubmit.addEventListener('click', handleSmartSubmit);
+
+        btnReset.addEventListener('click', () => {
+            // Reset state
+            isExamStarted = false;
+            isSubmitted = false;
+            timeLeft = TIMER_MINUTES * 60;
+            essayTextarea.value = '';
+            essayTextarea.disabled = false;
+            
+            // Reset UI Events
+            const event = new Event('input');
+            essayTextarea.dispatchEvent(event); // trigger reset of counters
+            
+            updateTimerDisplay();
+            
+            // View Swapping
+            viewAnalysis.classList.add('hidden');
+            viewEditor.classList.add('hidden');
+            viewEditor.classList.remove('flex');
+            viewStart.classList.remove('hidden');
+            
+            // Controls Reset
+            btnRandomize.classList.remove('hidden');
+            btnToggleTimer.classList.add('hidden');
+            btnToggleAssistant.classList.add('hidden');
+            
+            // Reset Smart Assistant UI
+            showSmartAssistant = true;
+            assistantContent.classList.remove('hidden');
+            assistantHiddenMsg.classList.add('hidden');
+            smartAssistantBox.classList.remove('opacity-50');
+            btnToggleAssistant.textContent = "Tutup";
+        });
+
+        // Start App
+        init();
+    </script>
+</body>
+</html>
